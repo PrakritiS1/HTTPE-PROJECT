@@ -1,0 +1,9 @@
+@startuml
+[*] --> CLOSED
+
+CLOSED --> OPEN : failures >= threshold
+OPEN --> HALF_OPEN : timeout expired
+HALF_OPEN --> CLOSED : success
+HALF_OPEN --> OPEN : failure
+
+@enduml

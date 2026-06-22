@@ -1,0 +1,36 @@
+@startuml
+title Batch Merchant Settlement Flow
+
+participant Scheduler
+participant SettlementService
+participant TransactionDB
+participant BankAPI
+participant NotificationService
+participant MQ
+
+== Batch Trigger ==
+
+Scheduler -> SettlementService: Trigger Daily Settlement
+
+SettlementService -> TransactionDB: Fetch Pending Transactions
+TransactionDB --> SettlementService: Batch Data
+
+SettlementService -> SettlementService: Group by Merchant
+
+loop Each Merchant
+    SettlementService -> BankAPI: Initiate Transfer
+
+    alt Success
+        BankAPI --> SettlementService: Settlement Success
+        SettlementService -> TransactionDB: Mark Settled
+    else Failure
+        BankAPI --> SettlementService: Failure Response
+        SettlementService -> MQ: Publish Failure Event
+    end
+end
+
+SettlementService -> NotificationService: Send Settlement Report
+
+NotificationService -> Merchant: Settlement Summary
+
+@enduml

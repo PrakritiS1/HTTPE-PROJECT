@@ -1,0 +1,39 @@
+@startuml
+title System Failover & Recovery Flow
+
+participant LoadBalancer
+participant PrimaryAPI
+participant SecondaryAPI
+participant HealthMonitor
+participant DatabaseReplica
+participant MQ
+
+== Normal Operation ==
+
+LoadBalancer -> PrimaryAPI: Route Requests
+PrimaryAPI -> DatabaseReplica: Read/Write Ops
+
+== Failure Detection ==
+
+HealthMonitor -> PrimaryAPI: Health Check Ping
+PrimaryAPI --> HealthMonitor: No Response
+
+HealthMonitor -> LoadBalancer: Trigger Failover
+
+== Failover Activation ==
+
+LoadBalancer -> SecondaryAPI: Switch Traffic
+
+SecondaryAPI -> DatabaseReplica: Sync State Check
+DatabaseReplica --> SecondaryAPI: Sync OK
+
+SecondaryAPI -> MQ: Resume Processing Queues
+
+SecondaryAPI --> LoadBalancer: Service Active
+
+== Recovery ==
+
+PrimaryAPI -> HealthMonitor: Restarted
+HealthMonitor -> LoadBalancer: Restore Primary (optional)
+
+@enduml

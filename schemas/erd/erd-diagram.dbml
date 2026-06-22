@@ -1,0 +1,73 @@
+Table users {
+  user_id uuid [pk]
+  full_name varchar
+  email varchar [unique]
+  phone varchar [unique]
+  password_hash text
+  kyc_status varchar
+  created_at timestamp
+}
+
+Table accounts {
+  account_id uuid [pk]
+  user_id uuid [ref: > users.user_id]
+  account_type varchar
+  balance decimal
+  currency char
+  status varchar
+  created_at timestamp
+}
+
+Table transactions {
+  transaction_id uuid [pk]
+  from_account_id uuid [ref: > accounts.account_id]
+  to_account_id uuid [ref: > accounts.account_id]
+  amount decimal
+  status varchar
+  transaction_type varchar
+  reference_id varchar
+  created_at timestamp
+}
+
+Table ledger_entries {
+  entry_id uuid [pk]
+  transaction_id uuid [ref: > transactions.transaction_id]
+  account_id uuid [ref: > accounts.account_id]
+  entry_type varchar
+  amount decimal
+  created_at timestamp
+}
+
+Table transaction_events {
+  event_id uuid [pk]
+  transaction_id uuid [ref: > transactions.transaction_id]
+  event_type varchar
+  event_payload json
+  created_at timestamp
+}
+
+Table fraud_rules {
+  rule_id uuid [pk]
+  rule_name varchar
+  rule_expression text
+  severity varchar
+  is_active boolean
+}
+
+Table merchant_settlements {
+  settlement_id uuid [pk]
+  merchant_id uuid
+  total_amount decimal
+  settlement_status varchar
+  settlement_date date
+  created_at timestamp
+}
+
+Table notification_log {
+  notification_id uuid [pk]
+  user_id uuid [ref: > users.user_id]
+  channel varchar
+  message text
+  status varchar
+  created_at timestamp
+}0

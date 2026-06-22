@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Financial Transaction System API
+  version: 1.0.0
+  description: APIs for payments, accounts, and ledger system
+
+servers:
+  - url: https://api.example.com/v1
+
+paths:
+
+  /accounts/{accountId}:
+    get:
+      summary: Get account details
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+
+  /transactions:
+    post:
+      summary: Create transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "201":
+          description: Transaction created
+
+    get:
+      summary: Get transactions (paginated)
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 10
+      responses:
+        "200":
+          description: List of transactions
+
+components:
+
+  schemas:
+
+    AccountResponse:
+      type: object
+      properties:
+        account_id:
+          type: string
+        balance:
+          type: number
+        currency:
+          type: string
+
+    TransactionRequest:
+      type: object
+      properties:
+        from_account_id:
+          type: string
+        to_account_id:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+      required:
+        - from_account_id
+        - to_account_id
+        - amount
+
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string0

@@ -1,0 +1,62 @@
+@startuml
+title P2P Payment Transaction Flow
+
+actor UserA as Sender
+actor UserB as Receiver
+
+participant App as MobileApp
+participant API as PaymentAPI
+participant Auth as AuthService
+participant Wallet as WalletService
+participant Ledger as LedgerService
+participant Notification as NotificationService
+participant MQ as MessageQueue
+
+== Happy Path ==
+
+Sender -> App: Initiate Payment
+App -> API: POST /transfer (receiver, amount)
+
+API -> Auth: Validate User Token
+Auth --> API: Token Valid
+
+API -> Wallet: Check Balance
+Wallet --> API: Sufficient Funds
+
+API -> Ledger: Debit Sender Account
+Ledger --> API: Debit Success
+
+API -> Ledger: Credit Receiver Account
+Ledger --> API: Credit Success
+
+API -> MQ: Publish Transaction Event
+MQ -> Notification: Async event
+
+Notification -> UserB: Payment Received Alert
+
+API --> App: Success Response
+
+== Failure Scenarios ==
+
+alt Insufficient Balance
+    Wallet --> API: Balance Low
+    API --> App: Transaction Failed (Insufficient Funds)
+end
+
+alt Auth Failure
+    Auth --> API: Invalid Token
+    API --> App: Unauthorized Error
+end
+
+alt Ledger Failure
+    Ledger --> API: DB Error
+    API -> Ledger: Rollback Debit (Compensation)
+    API --> App: Transaction Failed + Rollback Done
+end
+
+alt Timeout Scenario
+    API -> Ledger: Retry Debit (max 3 attempts)
+    API --> App: Pending Status
+end
+
+@enduml
