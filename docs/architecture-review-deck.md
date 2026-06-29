@@ -69,4 +69,23 @@ User → API Gateway → Services → Kafka → DB
 ---
 
 ## Slide 11: Conclusion
-System is scalable, resilient, and production-ready for high traffic workloads.
+System is scalable, resilient, and production-ready for high traffic workloads.+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
